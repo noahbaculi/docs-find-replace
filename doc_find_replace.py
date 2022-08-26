@@ -39,6 +39,10 @@ def allowed_file(filename):
 def upload_file():
     if request.method == "POST":
         # check if the post request has the file part
+        from pprint import pprint as pp
+
+        pp(request)
+
         if "file" not in request.files:
             flash("No file part")
             return redirect(request.url)
