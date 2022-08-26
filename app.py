@@ -1,4 +1,5 @@
 from flask import Flask
+import gunicorn  # must be in requirements.txt for Heroku deployment
 
 app = Flask(__name__)
 
