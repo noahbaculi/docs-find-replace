@@ -37,7 +37,7 @@ if __name__ == "__main__":
             print(f"\t{str_to_replace} -> {replacement_str}")
 
             # Add column values that are not excluded to list to be added to
-            # output fn
+            # output filename
             column_substrings_excl_from_fn = [
                 "date",
                 "industry",
