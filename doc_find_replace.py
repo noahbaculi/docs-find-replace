@@ -86,7 +86,7 @@ if __name__ == "__main__":
             if not any(substr in str_to_replace.lower() for substr in column_substrings_excl_from_fn):
                 output_fn_additions.append(replacement_str)
 
-            # Execute replacement
+            # Execute document replacement
             regex = re.compile(re.escape(str_to_replace))
             docx_replace_regex(doc, regex, replacement_str)
 
