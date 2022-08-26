@@ -58,14 +58,17 @@ def batch_replace(
 
     replacements_df = pd.read_csv(replacements_csv)
     replacements_df = replacements_df.truncate(after=max_new_docs - 1)  # limit number of documents generated
-    template_fn = template_docx
 
-    # TODO add extension checking for template_docx and replacements_csv
+    # Check input file extensions
+    if filename_ext(template_docx) not in [".doc", ".docx"]:
+        raise ValueError(f"{template_docx} does not have a valid file extension.")
+    if filename_ext(replacements_csv) != ".csv":
+        raise ValueError(f"{replacements_csv} does not have a valid file extension.")
 
     # Loop through each replacement row
     for doc_number, doc_replacements in replacements_df.iterrows():
         print(f"Document {doc_number+1} - creating replacements for:")
-        doc = Document(template_fn)
+        doc = Document(template_docx)
         output_fn_additions = []
 
         # Loop through each replacement in the row for the document
@@ -102,7 +105,7 @@ if __name__ == "__main__":
     batch_replace(
         template_docx="cover_letter_test.docx",
         replacements_csv="replacements.csv",
-        max_new_docs=10,
+        max_new_docs=3,
         output_dir="uploads",
         output_base_fn="Cover Letter Test",
         output_filetype=".docx",
