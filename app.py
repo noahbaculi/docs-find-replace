@@ -1,47 +1,58 @@
 import os
-import re
 
-from flask import Flask, flash, redirect, render_template, request, url_for
+import gunicorn
+from flask import Flask, redirect, render_template, request, url_for
 from werkzeug.utils import secure_filename
 
 import doc_find_replace
 
-UPLOAD_FOLDER = "uploads"
-ALLOWED_EXTENSIONS = {"txt", "pdf", "png", "jpg", "jpeg", "gif"}
-
 app = Flask(__name__)
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
-def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+def clear_folder(dir: str):
+    for file in os.listdir(dir):
+        os.remove(os.path.join(dir, file))
 
 
 @app.route("/", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
-        # check if the post request has the file part
+        upload_dir = "uploads"
+        output_dir = "created"
 
-        eprint(request.files)
+        clear_folder(upload_dir)
+        clear_folder(output_dir)
 
-        if "file" not in request.files:
-            flash("No file part")
-            return redirect(request.url)
-        file = request.files["file"]
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == "":
-            flash("No selected file")
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
+        template_file = request.files.get("template_file")
+        replacements_file = request.files.get("replacements_file")
 
-            file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-            # doc_find_replace.batch_replace(
-            #     replacements_csv="replacements.csv", replacement_docx="cover_letter_test.docx"
-            # )
+        if template_file and replacements_file:
+            template_fn = secure_filename(template_file.filename)
+            template_file.save(os.path.join(upload_dir, template_fn))
+
+            # if output_base_fn == "":  # if no base filename is provided
+            output_base_fn = secure_filename(request.form.get("output_base_fn")) or template_fn
+            output_filetype = request.form.get("output_format") or ".docx"
+
+            replacements_fn = secure_filename(replacements_file.filename)
+            replacements_file.save(os.path.join(upload_dir, replacements_fn))
+
+            eprint((template_fn, replacements_fn, output_base_fn, output_filetype))
+
+            doc_find_replace.batch_replace(
+                replacements_csv=replacements_fn,
+                template_docx="cover_letter_test.docx",
+                output_dir=output_dir,
+                output_base_fn=output_base_fn,
+                output_filetype=output_filetype,
+            )
             ## SUCCESS
+
+            # clear_folder(upload_dir)
+            # clear_folder(output_dir)
+
             return "", 201
+
     return render_template("main.html")
 
 

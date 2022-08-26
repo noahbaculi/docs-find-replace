@@ -6,6 +6,9 @@ from docx import Document
 
 
 def docx_replace_regex(doc_obj, regex, replace):
+    """
+    TODO docstring
+    """
     for p in doc_obj.paragraphs:
         if regex.search(p.text):
             inline = p.runs
@@ -21,9 +24,20 @@ def docx_replace_regex(doc_obj, regex, replace):
                 docx_replace_regex(cell, regex, replace)
 
 
-def batch_replace(replacements_csv: str, replacement_docx: str):
+def filename_ext(filename: str) -> str:
+    return os.path.splitext(filename)[1]
+
+
+def batch_replace(
+    *, template_docx: str, replacements_csv: str, output_dir: str, output_base_fn: str, output_filetype: str
+):
+    """
+    TODO docstring
+    """
     replacements_df = pd.read_csv(replacements_csv)
-    template_fn = replacement_docx
+    template_fn = template_docx
+
+    # TODO add extension checking for template_docx and replacements_csv
 
     # Loop through each replacement row
     for doc_number, doc_replacements in replacements_df.iterrows():
@@ -53,12 +67,13 @@ def batch_replace(replacements_csv: str, replacement_docx: str):
         if output_fn_addition_str:
             output_fn_addition_str = f" - {output_fn_addition_str}"
 
-        template_fn_no_ext = os.path.splitext(template_fn)[0]
-        output_fn = f"{template_fn_no_ext}{output_fn_addition_str}.docx"
+        # TODO handle .pdf output filetype
+
+        output_fn = os.path.join(output_dir, f"{output_base_fn}{output_fn_addition_str}.docx")
         doc.save(output_fn)
         print(f"Document {doc_number} - file saved to '{output_fn}'.")
         print()
 
 
 if __name__ == "__main__":
-    batch_replace(replacements_csv="replacements.csv", replacement_docx="cover_letter_test.docx")
+    batch_replace(replacements_csv="replacements.csv", template_docx="cover_letter_test.docx")

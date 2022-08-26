@@ -9,7 +9,7 @@
 					<label for="template_file">Template File (.docx)</label>
 				</td>
 				<td>
-					<input type="file" name="template_file" accept=".doc,.docx">
+					<input type="file" name="template_file" accept=".doc,.docx" required>
 				</td>
 			</tr>
 			<tr>
@@ -17,7 +17,7 @@
 					<label for="replacements_file">Replacements File (.csv)</label>
 				</td>
 				<td>
-					<input type="file" name="replacements_file" accept=".csv">
+					<input type="file" name="replacements_file" accept=".csv" required>
 				</td>
 			</tr>
 			<tr>
@@ -31,12 +31,15 @@
 			</tr>
 			<tr>
 				<td>
-					<label for="category">Output Format</label>
+					<label for="category">Output Filetype</label>
 				</td>
 				<td>
-					<input type="radio" id="output_docx" name="output_format">
+					<input type="radio" name="output_filetype" id="output_docx"
+						value=".docx">
 					<label for="output_docx">.docx</label><br>
-					<input type="radio" id="output_pdf" name="output_format">
+
+					<input type="radio" name="output_filetype" id="output_pdf"
+						value=".pdf">
 					<label for="output_pdf">.pdf</label><br>
 				</td>
 			</tr>
