@@ -5,23 +5,28 @@ import pandas as pd
 from docx import Document
 
 
-def docx_replace_regex(doc_obj, regex, replace):
+def docx_replace_regex(doc_obj: Document, regex_to_replace: re.compile, replacement: str) -> None:
     """
-    TODO docstring
+    Replace the regex in a docx.Document object.
+
+    Args:
+        doc_obj: Template `docx.Document` object.
+        regex_to_replace: Regex compile to replace in the document.
+        replacement : Replacement string to substitute for the regex.
     """
     for p in doc_obj.paragraphs:
-        if regex.search(p.text):
+        if regex_to_replace.search(p.text):
             inline = p.runs
             # Loop added to work with runs (strings with same style)
             for i in range(len(inline)):
-                if regex.search(inline[i].text):
-                    text = regex.sub(replace, inline[i].text)
+                if regex_to_replace.search(inline[i].text):
+                    text = regex_to_replace.sub(replacement, inline[i].text)
                     inline[i].text = text
 
     for table in doc_obj.tables:
         for row in table.rows:
             for cell in row.cells:
-                docx_replace_regex(cell, regex, replace)
+                docx_replace_regex(cell, regex_to_replace, replacement)
 
 
 def filename_ext(filename: str) -> str:
@@ -29,11 +34,27 @@ def filename_ext(filename: str) -> str:
 
 
 def batch_replace(
-    *, template_docx: str, replacements_csv: str, output_dir: str, output_base_fn: str, output_filetype: str
+    *,
+    template_docx: str,
+    replacements_csv: str,
+    output_dir: str,
+    output_base_fn: str,
+    output_filetype: str,
 ):
     """
-    TODO docstring
+    Generate multiple output files by executing multiple sets of find-replace operations.
+
+    Args:
+        template_docx: Path to the template document.
+        replacements_csv: Path to the replacements spec document. Each row
+            specifies a document version to generate. Each column header
+            specifies the text to replace in the template. The column values
+            specify the text to substitute during the replacement.
+        output_dir: Path to the output directory.
+        output_base_fn: Base filename for the generated output files.
+        output_filetype: Output filetype (.docx, .pdf)
     """
+
     replacements_df = pd.read_csv(replacements_csv)
     template_fn = template_docx
 
@@ -76,4 +97,5 @@ def batch_replace(
 
 
 if __name__ == "__main__":
+    # TODO add req args
     batch_replace(replacements_csv="replacements.csv", template_docx="cover_letter_test.docx")
