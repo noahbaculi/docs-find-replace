@@ -1,1 +1,1 @@
-web: gunicorn doc_find_replace:app
+web: gunicorn app:app

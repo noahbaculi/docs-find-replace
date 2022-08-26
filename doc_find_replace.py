@@ -3,12 +3,9 @@ import re
 
 import pandas as pd
 from docx import Document
-from flask import Flask, flash, redirect, render_template, request, url_for
-from werkzeug.utils import secure_filename
 
 
 def docx_replace_regex(doc_obj, regex, replace):
-
     for p in doc_obj.paragraphs:
         if regex.search(p.text):
             inline = p.runs
@@ -24,44 +21,9 @@ def docx_replace_regex(doc_obj, regex, replace):
                 docx_replace_regex(cell, regex, replace)
 
 
-UPLOAD_FOLDER = "/uploads"
-ALLOWED_EXTENSIONS = {"txt", "pdf", "png", "jpg", "jpeg", "gif"}
-
-app = Flask(__name__)
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
-
-def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-@app.route("/", methods=["GET", "POST"])
-def upload_file():
-    if request.method == "POST":
-        # check if the post request has the file part
-        from pprint import pprint as pp
-
-        pp(request)
-
-        if "file" not in request.files:
-            flash("No file part")
-            return redirect(request.url)
-        file = request.files["file"]
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == "":
-            flash("No selected file")
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-            return redirect(url_for("uploaded_file", filename=filename))
-    return render_template("main.html")
-
-
-if __name__ == "__main__":
-    replacements_df = pd.read_csv("replacements.csv")
-    template_fn = "cover_letter_test.docx"
+def batch_replace(replacements_csv: str, replacement_docx: str):
+    replacements_df = pd.read_csv(replacements_csv)
+    template_fn = replacement_docx
 
     # Loop through each replacement row
     for doc_number, doc_replacements in replacements_df.iterrows():
@@ -96,3 +58,7 @@ if __name__ == "__main__":
         doc.save(output_fn)
         print(f"Document {doc_number} - file saved to '{output_fn}'.")
         print()
+
+
+if __name__ == "__main__":
+    batch_replace(replacements_csv="replacements.csv", replacement_docx="cover_letter_test.docx")

@@ -2,6 +2,46 @@
 <title>Upload new File</title>
 <h1>Upload new File</h1>
 <form method=post enctype=multipart/form-data>
-    <input type=file name=file>
-    <input type=submit value=Upload>
+	<table>
+		<tbody>
+			<tr>
+				<td>
+					<label for="template_file">Template File (.docx)</label>
+				</td>
+				<td>
+					<input type="file" name="template_file" accept=".doc,.docx">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="replacements_file">Replacements File (.csv)</label>
+				</td>
+				<td>
+					<input type="file" name="replacements_file" accept=".csv">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="output_base_fn">Output Base Filename</label>
+				</td>
+				<td>
+					<input type="text" name="output_base_fn" maxlength="50" size="30"
+						placeholder="John Doe Cover Letter">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="category">Output Format</label>
+				</td>
+				<td>
+					<input type="radio" id="output_docx" name="output_format">
+					<label for="output_docx">.docx</label><br>
+					<input type="radio" id="output_pdf" name="output_format">
+					<label for="output_pdf">.pdf</label><br>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<input type=submit value=Upload>
 </form>
