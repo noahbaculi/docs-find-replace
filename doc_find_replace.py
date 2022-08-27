@@ -1,13 +1,16 @@
 import itertools
 import os
+import platform
 import re
-from concurrent.futures import ThreadPoolExecutor
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 import pandas as pd
-from docx import Document
-from docx2pdf import convert
 import pythoncom
+from docx import Document
+
+if platform.system() == "Windows":
+    from docx2pdf import convert
 
 
 def docx_replace_regex(doc_obj: Document, regex_to_replace: re.compile, replacement: str) -> None:
@@ -167,8 +170,8 @@ if __name__ == "__main__":
         output_filetype=".docx",
     )
 
-    from zipfile import ZipFile
     from os.path import basename
+    from zipfile import ZipFile
 
     with ZipFile("generated_documents.zip", "w") as zip_obj:
         for generated_doc_path in output_file_paths:
