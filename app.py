@@ -37,21 +37,19 @@ def upload_file():
             template_fn = secure_filename(template_file.filename)
             template_file.save(os.path.join(upload_dir, template_fn))
 
-            # if output_base_fn == "":  # if no base filename is provided
             output_base_fn = secure_filename(request.form.get("output_base_fn")) or template_fn
-            output_filetype = request.form.get("output_filetype") or ".docx"
 
             replacements_fn = secure_filename(replacements_file.filename)
             replacements_file.save(os.path.join(upload_dir, replacements_fn))
 
-            eprint((template_fn, replacements_fn, output_base_fn, output_filetype))
+            eprint((template_fn, replacements_fn, output_base_fn))
 
             output_file_paths = doc_find_replace.batch_replace(
                 replacements_csv=replacements_fn,
                 template_docx=template_fn,
                 output_dir=output_dir,
                 output_base_fn=output_base_fn,
-                output_filetype=output_filetype,
+                output_filetype=".docx",
             )
 
             output_zip_path = os.path.join(output_dir, "generated_documents.zip")
