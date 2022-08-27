@@ -13,6 +13,9 @@ app = Flask(__name__)
 
 
 def clear_folder(dir: str):
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+
     for file in os.listdir(dir):
         try:
             os.remove(os.path.join(dir, file))
