@@ -1,5 +1,6 @@
 import os
 from os.path import basename
+import shutil
 from time import sleep
 from zipfile import ZipFile
 
@@ -82,10 +83,14 @@ def upload_file():
             print(f"output_file_paths : {output_file_paths}")
             print(os.listdir(output_dir))
 
-            output_zip_path = os.path.join(output_dir, "generated_documents.zip")
-            with ZipFile(output_zip_path, "w") as zip_obj:
-                for generated_doc_path in output_file_paths:
-                    zip_obj.write(generated_doc_path, basename(generated_doc_path))
+            # output_zip_path = os.path.join(output_dir, "generated_documents.zip")
+            # with ZipFile(output_zip_path, "w") as zip_obj:
+            #     for generated_doc_path in output_file_paths:
+            #         zip_obj.write(generated_doc_path,
+            #         basename(generated_doc_path))
+
+            output_zip_fn = request.form.get("output_zip_fn", "generated_documents.zip")
+            shutil.make_archive(root_dir="created", format="zip", base_name=output_zip_fn.replace(".zip", ""))
 
             # Delete all working files after request
             @after_this_request
@@ -96,8 +101,7 @@ def upload_file():
 
             # Download the file
             try:
-                output_zip_fn = request.form.get("output_zip_fn", "generated_documents.zip")
-                return send_from_directory(output_dir, output_zip_fn, as_attachment=True)
+                return send_from_directory("", output_zip_fn, as_attachment=True)
             except FileNotFoundError:
                 abort(404)
 
