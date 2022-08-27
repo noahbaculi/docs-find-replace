@@ -90,7 +90,8 @@ def upload_file():
 
             # Download the file
             try:
-                return send_from_directory(output_dir, "generated_documents.zip", as_attachment=True)
+                output_zip_fn = request.form.get("output_zip_fn", "generated_documents.zip")
+                return send_from_directory(output_dir, output_zip_fn, as_attachment=True)
             except FileNotFoundError:
                 abort(404)
 
