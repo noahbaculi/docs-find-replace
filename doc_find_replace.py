@@ -87,7 +87,7 @@ def generate_doc(
 
     _log.append(f"Document {doc_number+1} - file saved to '{output_fn}'.")
 
-    return "\n".join(_log)
+    return output_fn
 
 
 def batch_replace(
@@ -98,7 +98,7 @@ def batch_replace(
     output_dir: str,
     output_base_fn: str,
     output_filetype: str,
-):
+) -> list[str]:
     """
     Generate multiple output files by executing multiple sets of find-replace operations.
 
@@ -125,38 +125,51 @@ def batch_replace(
 
     start = time.time()
 
+    output_file_paths = []
+
     # Loop through each replacement row
     # doc_spec is containerized in tuple to match ThreadPoolExecutor behavior
-    # for doc_number, doc_replacements in replacements_df.iterrows():
-    #     generate_doc(
-    #         (doc_number, doc_replacements),
-    #         template_docx,
-    #         output_dir,
-    #         output_base_fn,
-    #         output_filetype,
-    #     )
-
-    with ThreadPoolExecutor() as executor:
-        results = executor.map(
-            generate_doc,
-            replacements_df.iterrows(),
-            itertools.repeat(template_docx),
-            itertools.repeat(output_dir),
-            itertools.repeat(output_base_fn),
-            itertools.repeat(output_filetype),
+    for doc_number, doc_replacements in replacements_df.iterrows():
+        output_file_paths.append(
+            generate_doc(
+                (doc_number, doc_replacements),
+                template_docx,
+                output_dir,
+                output_base_fn,
+                output_filetype,
+            )
         )
-        for result in results:
-            print(result)
+
+    # with ThreadPoolExecutor() as executor:
+    #     results = executor.map(
+    #         generate_doc,
+    #         replacements_df.iterrows(),
+    #         itertools.repeat(template_docx),
+    #         itertools.repeat(output_dir),
+    #         itertools.repeat(output_base_fn),
+    #         itertools.repeat(output_filetype),
+    #     )
+    #     for result in results:
+    #         print(result)
 
     print("Time elapsed:", time.time() - start)
 
+    return output_file_paths
+
 
 if __name__ == "__main__":
-    batch_replace(
+    output_file_paths = batch_replace(
         template_docx="cover_letter_test.docx",
         replacements_csv="replacements.csv",
-        max_new_docs=25,
+        max_new_docs=5,
         output_dir="created",
         output_base_fn="Cover Letter Test",
         output_filetype=".docx",
     )
+
+    from zipfile import ZipFile
+    from os.path import basename
+
+    with ZipFile("generated_documents.zip", "w") as zip_obj:
+        for generated_doc_path in output_file_paths:
+            zip_obj.write(generated_doc_path, basename(generated_doc_path))
