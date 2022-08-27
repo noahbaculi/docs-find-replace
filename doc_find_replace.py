@@ -52,7 +52,7 @@ def generate_doc(
     doc_replacements = doc_spec[1]
 
     if platform.system() == "Windows":
-        pythoncom.CoInitialize()
+        pythoncom.CoInitialize()  # needed to prevent docx2pdf multithreading error
 
     _log = []
 
