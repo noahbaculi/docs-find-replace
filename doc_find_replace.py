@@ -6,10 +6,10 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 import pandas as pd
-import pythoncom
 from docx import Document
 
 if platform.system() == "Windows":
+    import pythoncom
     from docx2pdf import convert
 
 
