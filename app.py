@@ -4,12 +4,25 @@ from time import sleep
 from zipfile import ZipFile
 
 import gunicorn
-from flask import Flask, redirect, render_template, request, url_for, send_from_directory, abort, after_this_request
+from flask import Flask, abort, after_this_request, redirect, render_template, request, send_from_directory, url_for
 from werkzeug.utils import secure_filename
 
 import doc_find_replace
 
 app = Flask(__name__)
+
+
+def eprint(*args, **kwargs):
+    if __name__ == "__main__":
+        """
+        Printing to stderr so visible when using flask dev server
+        """
+        import sys
+        from pprint import pprint as pp
+
+        pp(*args, sys.stderr, **kwargs)
+    else:
+        print(*args, **kwargs)
 
 
 def clear_folder(dir: str):
@@ -86,15 +99,6 @@ if __name__ == "__main__":
     # to manage the secret key!
     app.secret_key = os.urandom(12).hex()
     app.config["SESSION_TYPE"] = "filesystem"
-
-    import sys
-    from pprint import pprint as pp
-
-    def eprint(*args, **kwargs):
-        """
-        Printing to stderr so visible when using flask dev server
-        """
-        pp(*args, sys.stderr, **kwargs)
 
     app.debug = True
     app.run()
