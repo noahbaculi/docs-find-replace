@@ -4,13 +4,18 @@ from time import sleep
 from zipfile import ZipFile
 
 import gunicorn
-from flask import Flask, abort, after_this_request, redirect, render_template, request, send_from_directory, url_for
+from flask import Flask, abort, after_this_request, render_template, request, send_from_directory
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from werkzeug.utils import secure_filename
 
 import doc_find_replace
 
 app = Flask(__name__)
+
+limiter = Limiter(app, key_func=get_remote_address, default_limits=["20 per day", "6 per hour"])
+
 CORS(app)
 
 
