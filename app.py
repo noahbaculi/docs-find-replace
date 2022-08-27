@@ -53,7 +53,7 @@ def upload_file():
             template_fn = secure_filename(template_file.filename)
             template_file.save(os.path.join(upload_dir, template_fn))
 
-            output_base_fn = secure_filename(request.form.get("output_base_fn")) or template_fn
+            output_base_fn = secure_filename(request.form.get("output_base_fn", "")) or template_fn
 
             replacements_fn = secure_filename(replacements_file.filename)
             replacements_file.save(os.path.join(upload_dir, replacements_fn))
