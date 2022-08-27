@@ -68,6 +68,9 @@ def upload_file():
                 output_filetype=".docx",
             )
 
+            print(f"output_file_paths : {output_file_paths}")
+            print(os.listdir(output_dir))
+
             output_zip_path = os.path.join(output_dir, "generated_documents.zip")
             with ZipFile(output_zip_path, "w") as zip_obj:
                 for generated_doc_path in output_file_paths:
@@ -80,15 +83,11 @@ def upload_file():
                 clear_folder(output_dir)
                 return response
 
-            """Download a file."""
+            # Download the file
             try:
                 return send_from_directory(output_dir, "generated_documents.zip", as_attachment=True)
             except FileNotFoundError:
                 abort(404)
-
-            ## SUCCESS
-
-            return "", 201
 
     return render_template("main.html")
 
