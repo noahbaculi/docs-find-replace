@@ -14,7 +14,7 @@ import doc_find_replace
 
 app = Flask(__name__)
 
-limiter = Limiter(app, key_func=get_remote_address, default_limits=["20 per day", "6 per hour"])
+limiter = Limiter(app, key_func=get_remote_address)
 
 CORS(app)
 
@@ -44,6 +44,7 @@ def clear_folder(dir: str):
 
 
 @app.route("/", methods=["GET", "POST"])
+@limiter.limit("20/day")
 def upload_file():
     if request.method == "POST":
         upload_dir = "uploads"
