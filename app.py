@@ -73,8 +73,8 @@ def upload_file():
             eprint((template_fn, replacements_fn, output_base_fn))
 
             output_file_paths = doc_find_replace.batch_replace(
-                replacements_csv=replacements_fn,
-                template_docx=template_fn,
+                replacements_csv=os.path.join(upload_dir, replacements_fn),
+                template_docx=os.path.join(upload_dir, template_fn),
                 output_dir=output_dir,
                 output_base_fn=output_base_fn,
                 output_filetype=".docx",
