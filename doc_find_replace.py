@@ -50,7 +50,9 @@ def generate_doc(
 ) -> str:
     doc_number = doc_spec[0]
     doc_replacements = doc_spec[1]
-    pythoncom.CoInitialize()
+
+    if platform.system() == "Windows":
+        pythoncom.CoInitialize()
 
     _log = []
 
