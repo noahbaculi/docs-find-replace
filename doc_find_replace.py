@@ -123,17 +123,16 @@ def batch_replace(
     output_filetype = output_filetype if output_filetype in [".docx", ".pdf"] else ".pdf"
 
     # Check input file extensions
-    if filename_ext(template_docx) not in [".doc", ".docx"]:
+    if filename_ext(template_docx) != ".docx":
         raise ValueError(f"{template_docx} does not have a valid file extension.")
     if filename_ext(replacements_csv) != ".csv":
         raise ValueError(f"{replacements_csv} does not have a valid file extension.")
 
     start = time.time()
 
-    output_file_paths = []
-
     # # Loop through each replacement row
     # # doc_spec is containerized in tuple to match ThreadPoolExecutor behavior
+    # output_file_paths = []
     # for doc_number, doc_replacements in replacements_df.iterrows():
     #     output_file_paths.append(
     #         generate_doc(
@@ -146,7 +145,7 @@ def batch_replace(
     #     )
 
     with ThreadPoolExecutor() as executor:
-        results = executor.map(
+        output_file_paths = executor.map(
             generate_doc,
             replacements_df.iterrows(),
             itertools.repeat(template_docx),
@@ -154,8 +153,6 @@ def batch_replace(
             itertools.repeat(output_base_fn),
             itertools.repeat(output_filetype),
         )
-        for result in results:
-            print(result)
 
     print("Time elapsed:", time.time() - start)
 
