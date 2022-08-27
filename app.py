@@ -51,6 +51,9 @@ def upload_file():
         template_file = request.files.get("template_file")
         replacements_file = request.files.get("replacements_file")
 
+        eprint(f"template_file : {template_file}")
+        eprint(f"replacements_file : {replacements_file}")
+
         if template_file and replacements_file:
             template_fn = secure_filename(template_file.filename)
             template_file.save(os.path.join(upload_dir, template_fn))
