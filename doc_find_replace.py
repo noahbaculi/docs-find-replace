@@ -3,6 +3,7 @@ import re
 
 import pandas as pd
 from docx import Document
+from docx2pdf import convert
 
 
 def docx_replace_regex(doc_obj: Document, regex_to_replace: re.compile, replacement: str) -> None:
@@ -58,6 +59,7 @@ def batch_replace(
 
     replacements_df = pd.read_csv(replacements_csv)
     replacements_df = replacements_df.truncate(after=max_new_docs - 1)  # limit number of documents generated
+    output_filetype = output_filetype if output_filetype in [".docx", ".pdf"] else ".pdf"
 
     # Check input file extensions
     if filename_ext(template_docx) not in [".doc", ".docx"]:
@@ -88,15 +90,19 @@ def batch_replace(
             regex = re.compile(re.escape(str_to_replace))
             docx_replace_regex(doc, regex, replacement_str)
 
-        # Save file
+        # Save .docx file
         output_fn_addition_str = " - ".join(output_fn_additions)
         if output_fn_addition_str:
             output_fn_addition_str = f" - {output_fn_addition_str}"
-
-        # TODO handle .pdf output filetype
-
         output_fn = os.path.join(output_dir, f"{output_base_fn}{output_fn_addition_str}.docx")
         doc.save(output_fn)
+
+        if output_filetype == ".pdf":
+            # Convert .docx file to .pdf file
+            convert(output_fn)
+            os.remove(output_fn)  # remove .docx version
+            output_fn = output_fn.replace(".docx", ".pdf")
+
         print(f"Document {doc_number+1} - file saved to '{output_fn}'.")
         print()
 
@@ -106,7 +112,7 @@ if __name__ == "__main__":
         template_docx="cover_letter_test.docx",
         replacements_csv="replacements.csv",
         max_new_docs=3,
-        output_dir="uploads",
+        output_dir="created",
         output_base_fn="Cover Letter Test",
-        output_filetype=".docx",
+        output_filetype=".pdf",
     )
