@@ -1,9 +1,13 @@
+import itertools
 import os
 import re
+from concurrent.futures import ThreadPoolExecutor
+import time
 
 import pandas as pd
 from docx import Document
 from docx2pdf import convert
+import pythoncom
 
 
 def docx_replace_regex(doc_obj: Document, regex_to_replace: re.compile, replacement: str) -> None:
@@ -32,6 +36,58 @@ def docx_replace_regex(doc_obj: Document, regex_to_replace: re.compile, replacem
 
 def filename_ext(filename: str) -> str:
     return os.path.splitext(filename)[1]
+
+
+def generate_doc(
+    doc_spec: tuple[int, pd.Series],
+    template_docx: str,
+    output_dir: str,
+    output_base_fn: str,
+    output_filetype: str,
+) -> str:
+    doc_number = doc_spec[0]
+    doc_replacements = doc_spec[1]
+    pythoncom.CoInitialize()
+
+    _log = []
+
+    _log.append(f"Document {doc_number+1} - creating replacements for:")
+    doc = Document(template_docx)
+    output_fn_additions = []
+
+    # Loop through each replacement in the row for the document
+    for str_to_replace, replacement_str in doc_replacements.items():
+        _log.append(f"\t{str_to_replace} -> {replacement_str}")
+
+        # Add column values that are not excluded to list to be added to
+        # output filename
+        column_substrings_excl_from_fn = [
+            "date",
+            "industry",
+        ]
+        if not any(substr in str_to_replace.lower() for substr in column_substrings_excl_from_fn):
+            output_fn_additions.append(replacement_str)
+
+        # Execute document replacement
+        regex = re.compile(re.escape(str_to_replace))
+        docx_replace_regex(doc, regex, replacement_str)
+
+    # Save .docx file
+    output_fn_addition_str = " - ".join(output_fn_additions)
+    if output_fn_addition_str:
+        output_fn_addition_str = f" - {output_fn_addition_str}"
+    output_fn = os.path.join(output_dir, f"{output_base_fn}{output_fn_addition_str}.docx")
+    doc.save(output_fn)
+
+    if output_filetype == ".pdf":
+        # Convert .docx file to .pdf file
+        convert(output_fn)
+        os.remove(output_fn)  # remove .docx version
+        output_fn = output_fn.replace(".docx", ".pdf")
+
+    _log.append(f"Document {doc_number+1} - file saved to '{output_fn}'.")
+
+    return "\n".join(_log)
 
 
 def batch_replace(
@@ -67,52 +123,40 @@ def batch_replace(
     if filename_ext(replacements_csv) != ".csv":
         raise ValueError(f"{replacements_csv} does not have a valid file extension.")
 
+    start = time.time()
+
     # Loop through each replacement row
-    for doc_number, doc_replacements in replacements_df.iterrows():
-        print(f"Document {doc_number+1} - creating replacements for:")
-        doc = Document(template_docx)
-        output_fn_additions = []
+    # doc_spec is containerized in tuple to match ThreadPoolExecutor behavior
+    # for doc_number, doc_replacements in replacements_df.iterrows():
+    #     generate_doc(
+    #         (doc_number, doc_replacements),
+    #         template_docx,
+    #         output_dir,
+    #         output_base_fn,
+    #         output_filetype,
+    #     )
 
-        # Loop through each replacement in the row for the document
-        for str_to_replace, replacement_str in doc_replacements.items():
-            print(f"\t{str_to_replace} -> {replacement_str}")
+    with ThreadPoolExecutor() as executor:
+        results = executor.map(
+            generate_doc,
+            replacements_df.iterrows(),
+            itertools.repeat(template_docx),
+            itertools.repeat(output_dir),
+            itertools.repeat(output_base_fn),
+            itertools.repeat(output_filetype),
+        )
+        for result in results:
+            print(result)
 
-            # Add column values that are not excluded to list to be added to
-            # output filename
-            column_substrings_excl_from_fn = [
-                "date",
-                "industry",
-            ]
-            if not any(substr in str_to_replace.lower() for substr in column_substrings_excl_from_fn):
-                output_fn_additions.append(replacement_str)
-
-            # Execute document replacement
-            regex = re.compile(re.escape(str_to_replace))
-            docx_replace_regex(doc, regex, replacement_str)
-
-        # Save .docx file
-        output_fn_addition_str = " - ".join(output_fn_additions)
-        if output_fn_addition_str:
-            output_fn_addition_str = f" - {output_fn_addition_str}"
-        output_fn = os.path.join(output_dir, f"{output_base_fn}{output_fn_addition_str}.docx")
-        doc.save(output_fn)
-
-        if output_filetype == ".pdf":
-            # Convert .docx file to .pdf file
-            convert(output_fn)
-            os.remove(output_fn)  # remove .docx version
-            output_fn = output_fn.replace(".docx", ".pdf")
-
-        print(f"Document {doc_number+1} - file saved to '{output_fn}'.")
-        print()
+    print("Time elapsed:", time.time() - start)
 
 
 if __name__ == "__main__":
     batch_replace(
         template_docx="cover_letter_test.docx",
         replacements_csv="replacements.csv",
-        max_new_docs=3,
+        max_new_docs=25,
         output_dir="created",
         output_base_fn="Cover Letter Test",
-        output_filetype=".pdf",
+        output_filetype=".docx",
     )
