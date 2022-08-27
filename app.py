@@ -3,10 +3,9 @@ from os.path import basename
 from time import sleep
 from zipfile import ZipFile
 
-from flask_cors import CORS
-
 import gunicorn
 from flask import Flask, abort, after_this_request, redirect, render_template, request, send_from_directory, url_for
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
 import doc_find_replace
