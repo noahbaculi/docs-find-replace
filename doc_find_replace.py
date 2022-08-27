@@ -132,30 +132,30 @@ def batch_replace(
 
     output_file_paths = []
 
-    # Loop through each replacement row
-    # doc_spec is containerized in tuple to match ThreadPoolExecutor behavior
-    for doc_number, doc_replacements in replacements_df.iterrows():
-        output_file_paths.append(
-            generate_doc(
-                (doc_number, doc_replacements),
-                template_docx,
-                output_dir,
-                output_base_fn,
-                output_filetype,
-            )
-        )
-
-    # with ThreadPoolExecutor() as executor:
-    #     results = executor.map(
-    #         generate_doc,
-    #         replacements_df.iterrows(),
-    #         itertools.repeat(template_docx),
-    #         itertools.repeat(output_dir),
-    #         itertools.repeat(output_base_fn),
-    #         itertools.repeat(output_filetype),
+    # # Loop through each replacement row
+    # # doc_spec is containerized in tuple to match ThreadPoolExecutor behavior
+    # for doc_number, doc_replacements in replacements_df.iterrows():
+    #     output_file_paths.append(
+    #         generate_doc(
+    #             (doc_number, doc_replacements),
+    #             template_docx,
+    #             output_dir,
+    #             output_base_fn,
+    #             output_filetype,
+    #         )
     #     )
-    #     for result in results:
-    #         print(result)
+
+    with ThreadPoolExecutor() as executor:
+        results = executor.map(
+            generate_doc,
+            replacements_df.iterrows(),
+            itertools.repeat(template_docx),
+            itertools.repeat(output_dir),
+            itertools.repeat(output_base_fn),
+            itertools.repeat(output_filetype),
+        )
+        for result in results:
+            print(result)
 
     print("Time elapsed:", time.time() - start)
 
