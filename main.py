@@ -5,7 +5,14 @@ from time import sleep
 from zipfile import ZipFile
 
 import gunicorn
-from flask import Flask, abort, after_this_request, render_template, request, send_from_directory
+from flask import (
+    Flask,
+    abort,
+    after_this_request,
+    render_template,
+    request,
+    send_from_directory,
+)
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -65,7 +72,9 @@ def upload_file():
             template_fn = secure_filename(template_file.filename)
             template_file.save(os.path.join(upload_dir, template_fn))
 
-            output_base_fn = secure_filename(request.form.get("output_base_fn", "")) or template_fn.replace(".docx", "")
+            output_base_fn = secure_filename(
+                request.form.get("output_base_fn", "")
+            ) or template_fn.replace(".docx", "")
 
             replacements_fn = secure_filename(replacements_file.filename)
             replacements_file.save(os.path.join(upload_dir, replacements_fn))
@@ -90,7 +99,11 @@ def upload_file():
             #         basename(generated_doc_path))
 
             output_zip_fn = request.form.get("output_zip_fn", "generated_documents.zip")
-            shutil.make_archive(root_dir="created", format="zip", base_name=output_zip_fn.replace(".zip", ""))
+            shutil.make_archive(
+                root_dir="created",
+                format="zip",
+                base_name=output_zip_fn.replace(".zip", ""),
+            )
 
             # Delete all working files after request
             @after_this_request

@@ -14,7 +14,9 @@ if platform.system() == "Windows":
     from docx2pdf import convert
 
 
-def docx_replace_regex(doc_obj: Document, regex_to_replace: re.compile, replacement: str) -> None:
+def docx_replace_regex(
+    doc_obj: Document, regex_to_replace: re.compile, replacement: str
+) -> None:
     """
     Replace the regex in a docx.Document object.
 
@@ -78,7 +80,10 @@ def generate_doc(
             "reason",
             "__category__",
         ]
-        if not any(substr in str_to_replace.lower() for substr in column_substrings_excl_from_fn):
+        if not any(
+            substr in str_to_replace.lower()
+            for substr in column_substrings_excl_from_fn
+        ):
             output_fn_additions.append(replacement_str)
 
         # Execute document replacement
@@ -89,7 +94,9 @@ def generate_doc(
     output_fn_addition_str = " - ".join(output_fn_additions)
     if output_fn_addition_str:
         output_fn_addition_str = f" - {output_fn_addition_str}"
-    output_fn = os.path.join(output_dir, f"{output_base_fn}{output_fn_addition_str}.docx")
+    output_fn = os.path.join(
+        output_dir, f"{output_base_fn}{output_fn_addition_str}.docx"
+    )
     doc.save(output_fn)
 
     if output_filetype == ".pdf":
@@ -139,8 +146,12 @@ def batch_replace(
     """
 
     replacements_df = pd.read_csv(replacements_csv)
-    replacements_df = replacements_df.truncate(after=max_new_docs - 1)  # limit number of documents generated
-    output_filetype = output_filetype if output_filetype in [".docx", ".pdf"] else ".pdf"
+    replacements_df = replacements_df.truncate(
+        after=max_new_docs - 1
+    )  # limit number of documents generated
+    output_filetype = (
+        output_filetype if output_filetype in [".docx", ".pdf"] else ".pdf"
+    )
 
     # Check input file extensions
     if filename_ext(template_docx_name) != ".docx":
