@@ -1,5 +1,6 @@
 import itertools
 import os
+from pathlib import Path
 import platform
 import re
 import time
@@ -62,6 +63,11 @@ def generate_doc(
 
     # Loop through each replacement in the row for the document
     for str_to_replace, replacement_str in doc_replacements.items():
+        if not replacement_str or pd.isna(replacement_str):
+            continue
+
+        replacement_str = replacement_str.strip()
+
         _log.append(f"\t{str_to_replace} -> {replacement_str}")
 
         # Add column values that are not excluded to list to be added to
@@ -69,6 +75,8 @@ def generate_doc(
         column_substrings_excl_from_fn = [
             "date",
             "industry",
+            "reason",
+            "__category__",
         ]
         if not any(substr in str_to_replace.lower() for substr in column_substrings_excl_from_fn):
             output_fn_additions.append(replacement_str)
@@ -87,7 +95,7 @@ def generate_doc(
     if output_filetype == ".pdf":
         # Convert .docx file to .pdf file
         convert(output_fn)
-        os.remove(output_fn)  # remove .docx version
+        # os.remove(output_fn)  # remove .docx version
         output_fn = output_fn.replace(".docx", ".pdf")
 
     _log.append(f"Document {doc_number+1} - file saved to '{output_fn}'.")
@@ -95,9 +103,20 @@ def generate_doc(
     return output_fn
 
 
+def get_docx_path(base_path: str, filename: str, folder_name: str | None = None) -> str:
+    default_path = os.path.join(base_path, filename)
+    if folder_name is None or pd.isna(folder_name):
+        return default_path
+
+    specialized_path = os.path.join(base_path, folder_name, filename)
+    assert os.path.isfile(specialized_path), f"{specialized_path} does not exist."
+    return specialized_path
+
+
 def batch_replace(
     *,
-    template_docx: str,
+    template_docx_base_dir: str,
+    template_docx_name: str,
     replacements_csv: str,
     max_new_docs: int = 25,
     output_dir: str,
@@ -108,7 +127,8 @@ def batch_replace(
     Generate multiple output files by executing multiple sets of find-replace operations.
 
     Args:
-        template_docx: Path to the template document.
+        template_docx_base_dir: Base directory path of the template document.
+        template_docx_name: Filename of the template document.
         replacements_csv: Path to the replacements spec document. Each row
             specifies a document version to generate. Each column header
             specifies the text to replace in the template. The column values
@@ -123,50 +143,55 @@ def batch_replace(
     output_filetype = output_filetype if output_filetype in [".docx", ".pdf"] else ".pdf"
 
     # Check input file extensions
-    if filename_ext(template_docx) != ".docx":
-        raise ValueError(f"{template_docx} does not have a valid file extension.")
+    if filename_ext(template_docx_name) != ".docx":
+        raise ValueError(f"{template_docx_name} does not have a valid file extension.")
     if filename_ext(replacements_csv) != ".csv":
         raise ValueError(f"{replacements_csv} does not have a valid file extension.")
 
     start = time.time()
 
-    # # Loop through each replacement row
-    # # doc_spec is containerized in tuple to match ThreadPoolExecutor behavior
-    # output_file_paths = []
-    # for doc_number, doc_replacements in replacements_df.iterrows():
-    #     output_file_paths.append(
-    #         generate_doc(
-    #             (doc_number, doc_replacements),
-    #             template_docx,
-    #             output_dir,
-    #             output_base_fn,
-    #             output_filetype,
-    #         )
-    #     )
+    # Loop through each replacement row
+    # doc_spec is containerized in tuple to match ThreadPoolExecutor behavior
+    output_file_paths = []
+    for doc_number, doc_replacements in replacements_df.iterrows():
+        template_docx_path = get_docx_path(template_docx_base_dir, template_docx_name, doc_replacements.__CATEGORY__)
+        print(f"{template_docx_path = }")
 
-    with ThreadPoolExecutor() as executor:
-        output_file_paths = executor.map(
-            generate_doc,
-            replacements_df.iterrows(),
-            itertools.repeat(template_docx),
-            itertools.repeat(output_dir),
-            itertools.repeat(output_base_fn),
-            itertools.repeat(output_filetype),
+        output_file_paths.append(
+            generate_doc(
+                (doc_number, doc_replacements),
+                template_docx_path,
+                output_dir,
+                output_base_fn,
+                output_filetype,
+            )
         )
 
-    print("Time elapsed:", time.time() - start)
+    # with ThreadPoolExecutor() as executor:
+    #     output_file_paths = executor.map(
+    #         generate_doc,
+    #         replacements_df.iterrows(),
+    #         itertools.repeat(template_docx),
+    #         itertools.repeat(output_dir),
+    #         itertools.repeat(output_base_fn),
+    #         itertools.repeat(output_filetype),
+    #     )
+
+    print(f"Time elapsed: {(time.time() - start):.2f}")
 
     return output_file_paths
 
 
 if __name__ == "__main__":
     output_file_paths = batch_replace(
-        template_docx="cover_letter_test.docx",
+        template_docx_base_dir=r"C:\Users\Noah\Google Drive\Active\Career\230800_Job_Apps_2023\apps",
+        template_docx_name=r"Noah Baculi Cover Letter Template.docx",
         replacements_csv="replacements.csv",
-        max_new_docs=5,
-        output_dir="created",
-        output_base_fn="Cover Letter Test",
-        output_filetype=".docx",
+        max_new_docs=100,
+        output_dir=r"C:\Users\Noah\Google Drive\Active\Career\230800_Job_Apps_2023\apps",
+        output_base_fn="Noah Baculi Cover Letter",
+        output_filetype=".pdf",
+        # output_filetype=".docx",
     )
 
     from os.path import basename

@@ -1,4 +1,15 @@
-[DATE],[COMPANY],[INDUSTRY],[POSITION]
-"January 1st, 2025",Apple,consumer technology,Associate Accountant
-"January 1st, 2025",Crunchyroll,anime streaming,Recruiter
-"January 1st, 2025",Twitter,social media,Marketing Specialist
+[DATE],[COMPANY],[INDUSTRY],[REASON],[POSITION],__CATEGORY__
+"February 12th, 2024","Ascend Analytics ",,of the innovative techniques you utilize to tackle multifaceted energy data analytics challenges at scale and build a market intelligence platform focused on the renewable energy transition,Business Intelligence Software Engineer,data
+"February 12th, 2024",Gemini,,of the innovative techniques you utilize to tackle multifaceted decentralized data challenges at scale and build the industry-leading web3 marketplace and platform,Analytics Engineer,data
+"February 12th, 2024",Pax8,,of the innovative techniques you utilize to tackle multifaceted data and integration challenges at scale to build the leading cloud solutions platform,Data Software Engineer,data
+"February 12th, 2024",Redwood Materials,,of the innovative techniques you utilize to tackle multifaceted grid data and logistics challenges at scale and build the leading lithium-ion battery recycling ecosystem,Data Engineer,data
+"February 12th, 2024",Signifyd,,of the innovative techniques you utilize to tackle multifaceted payment data challenges at scale and build the industry-leading fraud protection platform,Data Scientist II,data
+"February 12th, 2024",Affirm,,of the innovative techniques you utilize to tackle multifaceted financial data and integration challenges to become the industry leader in consumer lending,Software Engineer II,rust_rewrite
+"February 12th, 2024",Affirm,,of the innovative techniques you utilize to tackle multifaceted financial data and integration challenges to become the industry leader in consumer lending,Backend Software Engineer,rust_rewrite
+"February 12th, 2024",Black Canyon Consulting,,of the innovative techniques you utilize to tackle multifaceted software reliability challenges at scale and provide critical engineering services to support the NIH,Software Developer,rust_rewrite
+"February 12th, 2024",Caffeine,,of the innovative techniques you utilize to tackle multifaceted video computing and data challenges at scale and build a leading independent video platform,Software Engineer,rust_rewrite
+"February 12th, 2024",Cloudflare,,of the innovative techniques you utilize to tackle multifaceted data and network delivery challenges at scale to build the industry-leading internet infrastructure ecosystem,Software Engineer,rust_rewrite
+"February 12th, 2024",LaunchDarkly,,of the innovative techniques you utilize to tackle multifaceted feature deployment challenges at scale and build the leading feature flag management platform,Backend Engineer,rust_rewrite
+"February 12th, 2024",Xometry,,of the innovative techniques you utilize to tackle multifaceted supply chain and commerce data challenges at scale and build the leading rapid manufacturing sourcing platform,Software Engineer I,rust_rewrite
+"February 12th, 2024",Reddit,,of the innovative techniques you utilize to tackle multifaceted integration and data challenges at scale to build a leading social community platform,Software Engineer - Developer Platform,tooling
+"February 12th, 2024",Channel Factory,,of the innovative techniques you utilize to tackle multifaceted digital data analytics and integration challenges at scale and build an advertising intelligence and optimization platform,Python Software Engineer,
