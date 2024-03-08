@@ -5,7 +5,7 @@ import platform
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor
-from pypdf import PdfMerger
+from pypdf import PdfWriter
 
 import pandas as pd
 from docx import Document
@@ -105,7 +105,7 @@ def generate_doc(
     resume_pdf_path = Path(template_docx).parent.joinpath("Noah Baculi Resume.pdf")
     assert resume_pdf_path.is_file(), f"{resume_pdf_path} does not exist."
 
-    with PdfMerger() as pdf_merger:
+    with PdfWriter() as pdf_merger:
         pdf_merger.append(output_fn)
         pdf_merger.append(resume_pdf_path)
         joined_output_fn = output_fn.replace("Cover Letter", "Cover Letter and Resume")
