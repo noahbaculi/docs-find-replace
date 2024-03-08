@@ -5,6 +5,7 @@ import platform
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor
+from pypdf import PdfMerger
 
 import pandas as pd
 from docx import Document
@@ -14,9 +15,7 @@ if platform.system() == "Windows":
     from docx2pdf import convert
 
 
-def docx_replace_regex(
-    doc_obj: Document, regex_to_replace: re.compile, replacement: str
-) -> None:
+def docx_replace_regex(doc_obj: Document, regex_to_replace: re.compile, replacement: str) -> None:
     """
     Replace the regex in a docx.Document object.
 
@@ -80,10 +79,7 @@ def generate_doc(
             "reason",
             "__category__",
         ]
-        if not any(
-            substr in str_to_replace.lower()
-            for substr in column_substrings_excl_from_fn
-        ):
+        if not any(substr in str_to_replace.lower() for substr in column_substrings_excl_from_fn):
             output_fn_additions.append(replacement_str)
 
         # Execute document replacement
@@ -94,9 +90,7 @@ def generate_doc(
     output_fn_addition_str = " - ".join(output_fn_additions)
     if output_fn_addition_str:
         output_fn_addition_str = f" - {output_fn_addition_str}"
-    output_fn = os.path.join(
-        output_dir, f"{output_base_fn}{output_fn_addition_str}.docx"
-    )
+    output_fn = os.path.join(output_dir, f"{output_base_fn}{output_fn_addition_str}.docx")
     doc.save(output_fn)
 
     if output_filetype == ".pdf":
@@ -106,6 +100,16 @@ def generate_doc(
         output_fn = output_fn.replace(".docx", ".pdf")
 
     _log.append(f"Document {doc_number+1} - file saved to '{output_fn}'.")
+
+    # Merge category PDF with cover letter PDF
+    resume_pdf_path = Path(template_docx).parent.joinpath("Noah Baculi Resume.pdf")
+    assert resume_pdf_path.is_file(), f"{resume_pdf_path} does not exist."
+
+    with PdfMerger() as pdf_merger:
+        pdf_merger.append(output_fn)
+        pdf_merger.append(resume_pdf_path)
+        joined_output_fn = output_fn.replace("Cover Letter", "Cover Letter and Resume")
+        pdf_merger.write(joined_output_fn)
 
     return output_fn
 
@@ -146,12 +150,8 @@ def batch_replace(
     """
 
     replacements_df = pd.read_csv(replacements_csv)
-    replacements_df = replacements_df.truncate(
-        after=max_new_docs - 1
-    )  # limit number of documents generated
-    output_filetype = (
-        output_filetype if output_filetype in [".docx", ".pdf"] else ".pdf"
-    )
+    replacements_df = replacements_df.truncate(after=max_new_docs - 1)  # limit number of documents generated
+    output_filetype = output_filetype if output_filetype in [".docx", ".pdf"] else ".pdf"
 
     # Check input file extensions
     if filename_ext(template_docx_name) != ".docx":
